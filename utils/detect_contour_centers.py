@@ -25,6 +25,7 @@ imgDialation = cv2.dilate(imgCanny, kernel, iterations=1)
 
 # 注意，在应用阈值化之后，形状是如何在黑色背景上表示为白色前景。
 # 下一步是使用轮廓检测??找到这些白色区域的位置：
+# HACK: CV_RETR_LIST : https://blog.csdn.net/c20081052/article/details/22422919
 cnts = cv2.findContours(imgDialation.copy(), cv2.RETR_LIST,
                         cv2.CHAIN_APPROX_SIMPLE)
 cnts = imutils.grab_contours(cnts)
