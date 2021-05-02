@@ -4,7 +4,7 @@
 import cv2, time
 
 # 1. Create an object
-video=cv2.VideoCapture(1)
+video=cv2.VideoCapture(0)
 
 
 a = 0
