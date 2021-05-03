@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-img = cv2.imread("./laser_dot.png")
+img = cv2.imread("./test2.png")
 imgHLS = cv2.cvtColor(img, cv2.COLOR_BGR2HLS)
 # Get the L channel
 
@@ -9,7 +9,7 @@ Lchannel = imgHLS[:,:,1]
 # Create the mask
 
 #change 250 to lower numbers to include more values as "white"
-mask = cv2.inRange(Lchannel, 253, 255)
+mask = cv2.inRange(Lchannel, 235, 255)
 # Apply Mask to original image
 
 res = cv2.bitwise_and(img,img, mask= mask)
@@ -21,6 +21,7 @@ res = cv2.bitwise_and(img,img, mask= mask)
 Lchannel = imgHLS[:,:,1]
 # mask = cv2.inRange(Lchannel, 250, 255)
 cv2.imshow("capturing", mask)
+cv2.imshow("original", img)
 
 # 5 For press any key to out (ms)
 cv2.waitKey(0)
