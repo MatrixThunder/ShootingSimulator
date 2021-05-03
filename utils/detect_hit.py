@@ -77,6 +77,13 @@ def detect_hit(frame,cnts):
                     # print(hit_area)
                     cv2.drawContours(frame, [hit_area], -1, (0, 0, 255), 1)
                     # cv2.fillPoly(frame, pts =[hit_area], color=(0,0,255))
+                    
+                    h, w = frame.shape[:2]
+                    mask = np.zeros([h+2, w+2], np.uint8)
+                    # mask = np.zeros(frame, dtype=np.uint8)
+
+
+                    cv2.floodFill(frame, mask, (cX,cY), (0, 0, 255), (90, 90, 90), (10, 10, 10), flags=8)
 
                     # cv2.drawContours(imgDialation, [hit_area], -1, (0, 255, 0), -1)
                     # cv2.fillPoly(imgDialation, pts =[hit_area], color=(255,255,255))
