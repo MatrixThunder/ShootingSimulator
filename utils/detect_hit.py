@@ -60,14 +60,19 @@ def detect_hit(frame,cnts):
 
     hit_area = []
     # passed in cnts.
+    idx = 0
+    # print(len(cnts))
     for c in cnts:
+        
         if(cX!=None and cY!=None):
+            
             flag = cv2.pointPolygonTest(c, (cX,cY), True)
             # print(flag)
             if(flag > 0 ):
-                print('hit')
+                idx += 1
+                # print('hit')
                 hit_area = c
-
+                print("you hit: ", idx, "ring")
                 if(len(hit_area) != 0 ):
                     # print(hit_area)
                     cv2.drawContours(frame, [hit_area], -1, (0, 0, 255), 1)
