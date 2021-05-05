@@ -3,7 +3,27 @@
 import argparse
 import imutils
 import cv2
+
+# import cvui
+
 import numpy as np
+
+from operator import itemgetter
+
+from utils import settings as config
+
+
+# def init_windows():
+#     WINDOW_NAME = "control panel"
+#     cvui.init(WINDOW_NAME)
+#     background = np.zeros((200, 400, 3), np.uint8)
+
+#     cvui.text(background,10,15,'hello')
+
+#     cvui.button(background,10,15,'Load Config')
+#     cvui.button(background,25,55,'Save Config')
+    
+#     cvui.imshow(WINDOW_NAME, background)
 
 
 def empty(a):
@@ -16,11 +36,15 @@ imgCanny = 3
 thresh = 4
 imgDialation = 5
 
+ths = 0 
+kernel_config = 0 
+
 def contour_generator(frame):
 
-    
-    # 构建命令行参数
-    # --frame 要处理的图像路径
+    ## CVUI stuff:
+    # init_windows()
+
+
 
 
     ratio = 3
@@ -42,10 +66,17 @@ def contour_generator(frame):
     cv2.createTrackbar("THS", "TrackBars", 0, 85, empty)
     cv2.createTrackbar("KNL size", "TrackBars", 0, 10, empty)
 
+    cv2.createButton("buttonName", empty)
 
 
-
-
+    ths = None
+    kernel_config = None
+    # print(config.read_img_settings())
+    if(config.read_img_settings() is not None):
+        ths, kernel_config = itemgetter("threshold","kernel_config" )(config.read_img_settings()) 
+        if((ths is not None) and (kernel_config is not None)):    
+            cv2.setTrackbarPos("THS", "TrackBars", ths)
+            cv2.setTrackbarPos("KNL size", "TrackBars", kernel_config)
 
 
 
@@ -59,9 +90,15 @@ def contour_generator(frame):
         s_max = cv2.getTrackbarPos("SAT max", "TrackBars")
         v_min = cv2.getTrackbarPos("VAL max", "TrackBars")
         v_max = cv2.getTrackbarPos("VAL max", "TrackBars")
+
+        # if(ths == 0 and kernel_config == 0):
         ths = cv2.getTrackbarPos("THS", "TrackBars")
-        kernel_config = cv2.getTrackbarPos("KNL size", "TrackBars")
-        kernel_config = 2 * kernel_config + 1
+
+        kernel_config_val = cv2.getTrackbarPos("KNL size", "TrackBars")
+
+
+
+        kernel_config = 2 * kernel_config_val + 1
 
         lower = np.array([h_min,s_min,v_min])
         upper = np.array([h_max,s_max,v_max])
@@ -107,5 +144,8 @@ def contour_generator(frame):
                                 cv2.CHAIN_APPROX_SIMPLE)
 
     cnts = imutils.grab_contours(cnts)       
+
+    # Saving settings to the local folder
+    config.save_img_settings(ths,kernel_config_val)
 
     return cnts, imgDialation
