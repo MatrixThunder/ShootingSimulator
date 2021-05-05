@@ -13,8 +13,8 @@ def capture_camera(id, process_func,detect_hit,generated_cnts):
     # video.set(cv2.CAP_PROP_FOURCC,cv2.VideoWriter_fourcc('M','J','P','G'))
     # cv2.VideoWriter_fourcc(*'MJPG')
 
-    cv2.namedWindow("capturing", 0)
-    cv2.resizeWindow("capturing", 800, 600)
+    # cv2.namedWindow("capturing", 0)
+    # cv2.resizeWindow("capturing", 800, 600)
     video.set(3, 1280)
 
     video.set(4, 768)

@@ -92,4 +92,7 @@ def detect_hit(frame,cnts):
 
     cv2.imshow("hit", imgDialation)
     cv2.imshow("hit_colored", frame)
+
+    cv2.moveWindow("hit",400,500)
+    cv2.moveWindow("hit_colored",800,500)
    

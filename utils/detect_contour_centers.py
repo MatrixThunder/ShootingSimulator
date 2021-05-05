@@ -15,9 +15,9 @@ def detect_contour_centers(frame):
     # 加载图像，转换为灰度，使用5 x 5内核进行高斯平滑处理，阈值化
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     blurred = cv2.GaussianBlur(gray, kernel_size, 0)
-    imgCanny = cv2.Canny(blurred, 100, 100*ratio, 6)
+    imgCanny = cv2.Canny(blurred, 100, 100*ratio, 5)
     thresh = cv2.threshold(blurred, 70, 255, cv2.THRESH_BINARY)[1]
-    imgDialation = cv2.dilate(imgCanny, kernel, iterations=1)
+    imgDialation = cv2.dilate(thresh, kernel, iterations=1)
     
     # 注意，在应用阈值化之后，形状表是如何在黑色背景上示为白色前景。
     # 下一步是使用轮廓检测??找到这些白色区域的位置：
@@ -34,7 +34,7 @@ def detect_contour_centers(frame):
         cX = int(M["m10"] / M["m00"])
         cY = int(M["m01"] / M["m00"])
         # 在图像上绘制轮廓及中心
-        cv2.drawContours(frame, [c], -1, (0, 255, 0), 2)
+        cv2.drawContours(frame, [c], -1, (0, 255, 0), 1)
         # cv2.circle(frame, (cX, cY), 7, (0, 255, 255), -1)
         cv2.putText(frame, "center", (cX - 20, cY - 20),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 2)

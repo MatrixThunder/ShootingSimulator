@@ -57,7 +57,7 @@ while True:
         cv2.rectangle(gray, (int(x), int(y)),
                       (int(x+w), int(y+h)), (255, 255, 0), 2)
 
-    cv2.imshow("capturing", gray)
+    # cv2.imshow("capturing", gray)
 
 
 # 4 show the frame!
