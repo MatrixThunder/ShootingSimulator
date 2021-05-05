@@ -13,9 +13,9 @@ def empty(a):
 def contour_generator(frame):
     # 构建命令行参数
     # --frame 要处理的图像路径
-    kernel_size = (5, 5)
-    kernel = np.ones(kernel_size, np.uint8)
-    ratio = 2
+
+
+    ratio = 3
 
     # imgHLS = cv2.cvtColor(frame, cv2.COLOR_BGR2HLS)
     # Lchannel = imgHLS[:,:,1]
@@ -23,7 +23,7 @@ def contour_generator(frame):
     # res = cv2.bitwise_and(frame,frame, mask= mask)
 
     cv2.namedWindow("TrackBars")
-    cv2.resizeWindow("TrackBars", 640, 240)
+    cv2.resizeWindow("TrackBars", 640, 300)
 
     cv2.createTrackbar("HUE min", "TrackBars", 0, 179, empty)
     cv2.createTrackbar("HUE max", "TrackBars", 19, 179, empty)
@@ -31,6 +31,8 @@ def contour_generator(frame):
     cv2.createTrackbar("SAT max", "TrackBars", 0, 170, empty)
     cv2.createTrackbar("VAL min", "TrackBars", 153, 259, empty)
     cv2.createTrackbar("VAL max", "TrackBars", 255, 255, empty)
+    cv2.createTrackbar("THS", "TrackBars", 0, 85, empty)
+    cv2.createTrackbar("KNL size", "TrackBars", 0, 10, empty)
 
     while True:
 
@@ -42,9 +44,15 @@ def contour_generator(frame):
         s_max = cv2.getTrackbarPos("SAT max", "TrackBars")
         v_min = cv2.getTrackbarPos("VAL max", "TrackBars")
         v_max = cv2.getTrackbarPos("VAL max", "TrackBars")
+        ths = cv2.getTrackbarPos("THS", "TrackBars")
+        kernel_config = cv2.getTrackbarPos("KNL size", "TrackBars")
+        kernel_config = 2 * kernel_config + 1
 
         lower = np.array([h_min,s_min,v_min])
         upper = np.array([h_max,s_max,v_max])
+
+        kernel_size = (kernel_config, kernel_config)
+        kernel = np.ones(kernel_size, np.uint8)
 
         mask = cv2.inRange(hsv,lower, upper)  
         imgResult = cv2.bitwise_and(frame, frame, mask=mask) 
@@ -52,8 +60,9 @@ def contour_generator(frame):
 
         # 加载图像，转换为灰度，使用5 x 5内核进行高斯平滑处理，阈值化
         gray = cv2.cvtColor(hsv, cv2.COLOR_BGR2GRAY)
-        blurred = cv2.GaussianBlur(gray, kernel_size, 0)
-        imgCanny = cv2.Canny(blurred, 100, 100*ratio, 5)
+        #blurred = cv2.GaussianBlur(gray, kernel_size, 0)
+        blurred = cv2.bilateralFilter(gray, d=kernel_config, sigmaColor=112, sigmaSpace= kernel_config, borderType=cv2.BORDER_REPLICATE)
+        imgCanny = cv2.Canny(blurred, ths, ths*ratio, 5, L2gradient=True)
         thresh = cv2.threshold(blurred, 70, 255, cv2.THRESH_BINARY)[1]
         imgDialation = cv2.dilate(imgCanny, kernel, iterations=1)
 
