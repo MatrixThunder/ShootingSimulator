@@ -2,13 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="277279a0-7205-494c-a651-2ef9e33412dd" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/utils/NOT_IN_USE/detect_contour_centers.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/calibration.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/camera_capturing.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/NOT_IN_USE/camera_capturing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/capture_camera.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/capture_camera.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/detect_contour_centers.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/detect_contour_centers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/lightness_threshhold.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/lightness_threshhold.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
