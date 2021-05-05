@@ -10,7 +10,15 @@ def empty(a):
     pass
 
 
+gray = 1
+blurred = 2 
+imgCanny = 3
+thresh = 4
+imgDialation = 5
+
 def contour_generator(frame):
+
+    
     # 构建命令行参数
     # --frame 要处理的图像路径
 
@@ -33,6 +41,13 @@ def contour_generator(frame):
     cv2.createTrackbar("VAL max", "TrackBars", 255, 255, empty)
     cv2.createTrackbar("THS", "TrackBars", 0, 85, empty)
     cv2.createTrackbar("KNL size", "TrackBars", 0, 10, empty)
+
+
+
+
+
+
+
 
     while True:
 
@@ -72,10 +87,10 @@ def contour_generator(frame):
         # cnts = cv2.findContours(imgDialation.copy(), cv2.RETR_LIST,
         #                         cv2.CHAIN_APPROX_SIMPLE)
 
-        cnts = cv2.findContours(thresh.copy(), cv2.RETR_LIST,
-                                cv2.CHAIN_APPROX_NONE)
+        # cnts = cv2.findContours(thresh.copy(), cv2.RETR_LIST,
+        #                         cv2.CHAIN_APPROX_NONE)
 
-        cnts = imutils.grab_contours(cnts)
+
 
         cv2.imshow("generated thresh", thresh)
         cv2.imshow("generated dialation", imgDialation)
@@ -87,12 +102,10 @@ def contour_generator(frame):
         if key == ord('q'):
             cv2.destroyAllWindows
             break
+     
+    cnts = cv2.findContours(imgDialation, cv2.RETR_LIST,
+                                cv2.CHAIN_APPROX_SIMPLE)
 
-        
+    cnts = imutils.grab_contours(cnts)       
 
-    return cnts
-
-# if __name__ == "__main__":
-#     img = cv2.imread("./target.png")
-#     contour_generator(img)
-#     cv2.waitKey(0)
+    return cnts, imgDialation

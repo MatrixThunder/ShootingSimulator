@@ -3,7 +3,7 @@
 
 import cv2, time
 
-def capture_camera(id, process_func,detect_hit,generated_cnts):
+def capture_camera(id, process_func,detect_hit,generated_cnts, generated_dialation):
     # 1. Create an object
     video = cv2.VideoCapture(id)
 
@@ -29,7 +29,7 @@ def capture_camera(id, process_func,detect_hit,generated_cnts):
         # Returns the contour array
         cnts = process_func(frame.copy())
 
-        detect_hit(frame,generated_cnts)
+        detect_hit(frame,generated_cnts, generated_dialation)
         # detect_hit(frame,cnts)
 
 

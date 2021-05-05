@@ -4,7 +4,9 @@ import imutils
 
 
 a = 0
-def detect_hit(frame,cnts):
+def detect_hit(frame,cnts,passed_in_dialation):
+
+    passed_in_dialation_copy = passed_in_dialation.copy()
 
     kernel_size = (5, 5)
     kernel = np.ones(kernel_size, np.uint8)
@@ -75,22 +77,26 @@ def detect_hit(frame,cnts):
                 print("you hit: ", idx, "ring")
                 if(len(hit_area) != 0 ):
                     # print(hit_area)
-                    cv2.drawContours(frame, [hit_area], -1, (0, 0, 255), 1)
+                    # Thick contour
+                    cv2.drawContours(frame, [hit_area], -1, (0, 0, 255), 2)
+                   
+
                     # cv2.fillPoly(frame, pts =[hit_area], color=(0,0,255))
                     
                     h, w = frame.shape[:2]
                     mask = np.zeros([h+2, w+2], np.uint8)
                     # mask = np.zeros(frame, dtype=np.uint8)
-
-
                     cv2.floodFill(frame, mask, (cX,cY), (0, 0, 255), (90, 90, 90), (10, 10, 10), flags=8)
 
-                    # cv2.drawContours(imgDialation, [hit_area], -1, (0, 255, 0), -1)
-                    # cv2.fillPoly(imgDialation, pts =[hit_area], color=(255,255,255))
+                    
+                    cv2.drawContours(passed_in_dialation_copy, [hit_area], -1, (255, 255, 255), 1)
+                    cv2.floodFill(passed_in_dialation_copy, mask, (cX,cY), (255, 255, 255), (90, 90, 90), (10, 10, 10), flags=4)
 
 
 
-    cv2.imshow("hit", imgDialation)
+
+    cv2.imshow("hit_in_dialation", passed_in_dialation_copy)
+
     cv2.imshow("hit_colored", frame)
 
     cv2.moveWindow("hit",400,500)
