@@ -7,7 +7,7 @@ def floodFill(start_pt):
     mask = np.zeros(np.asarray(numeric_matrix.shape)+2, dtype=np.uint8)
     # start_pt = (y,x)
     if matrix_np[start_pt]:
-    cv2.floodFill(numeric_matrix, mask, start_pt, 255, flags=4)
-    mask = mask[1:-1, 1:-1]
-    matrix_np[mask==1] = "c"
-    matrix = matrix_np.tolist()
+        cv2.floodFill(numeric_matrix, mask, start_pt, 255, flags=4)
+        mask = mask[1:-1, 1:-1]
+        matrix_np[mask==1] = "c"
+        matrix = matrix_np.tolist()
