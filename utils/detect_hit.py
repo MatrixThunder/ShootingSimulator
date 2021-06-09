@@ -39,6 +39,7 @@ def detect_hit(frame,cnts,passed_in_dialation):
     imgDialation = cv2.dilate(imgCanny, kernel, iterations=2)
     
     laser_cnts = cv2.findContours(imgDialation, cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+    cv2.imshow('imgDialation', imgDialation)
 
     laser_cnts = imutils.grab_contours(laser_cnts)
 
@@ -99,6 +100,7 @@ def detect_hit(frame,cnts,passed_in_dialation):
     cv2.imshow("hit_in_dialation", passed_in_dialation_copy)
 
     cv2.imshow("hit_colored", frame)
+
 
     cv2.moveWindow("hit_in_dialation",400,500)
     cv2.moveWindow("hit_colored",800,500)

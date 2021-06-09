@@ -2,6 +2,7 @@
 # TODO: install cv2
 
 import cv2, time
+from . import detect_contour_centers
 
 def capture_camera(id, process_func,detect_hit,generated_cnts, generated_dialation):
     # 1. Create an object
@@ -34,6 +35,10 @@ def capture_camera(id, process_func,detect_hit,generated_cnts, generated_dialati
 
 
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+
+        # detect_contour_centers(gray.copy())
+
         # cv2.imshow("capturing", gray)
 
         # 4 show the frame!
