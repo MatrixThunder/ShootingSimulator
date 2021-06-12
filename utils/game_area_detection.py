@@ -26,7 +26,7 @@ def find_squares(img):
                 cnt_len = cv.arcLength(cnt, True)
                 cnt = cv.approxPolyDP(cnt, 0.02*cnt_len, True)
                 if len(cnt) == 4 and cv.contourArea(cnt) > 1000 and cv.isContourConvex(cnt):
-                    cnt = cnt.reshape(-1, 2)
+                    cnt = cnt.reshape(-1, 2) #reshape to an array with 2 columns
                     max_cos = np.max([angle_cos( cnt[i], cnt[(i+1) % 4], cnt[(i+2) % 4] ) for i in range(4)])
                     if max_cos < 0.1:
                         squares.append(cnt)
@@ -40,6 +40,6 @@ plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
 plt.show()
 
 squares = find_squares(img)
-cv2.drawContours( img, squares, -1, (0, 255, 0), 1 )
+cv2.drawContours( img, squares, -1, (0, 255, 0), 1 ) #what about only draw the second contour
 plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
 plt.show()
