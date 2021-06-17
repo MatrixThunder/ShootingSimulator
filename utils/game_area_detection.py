@@ -41,7 +41,11 @@ plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
 plt.show()
 
 squares = find_squares(img)
+<<<<<<< HEAD
 
 cv2.drawContours( img, squares, -1, (255, 255, 0), 25 )
+=======
+cv2.drawContours( img, squares, -1, (0, 255, 0), 1 ) #what about only draw the second contour
+>>>>>>> 2d11dc0c55e11a8ff21ad6504a333f7f7093b2ba
 plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
 plt.show()
