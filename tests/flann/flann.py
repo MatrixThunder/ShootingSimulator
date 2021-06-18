@@ -11,8 +11,8 @@ import numpy as np
 MIN_MATCH_COUNT = 10
 
 # 读入两幅图片 图片中有相同部分
-img1 = cv2.imread("3.jpg", cv2.IMREAD_GRAYSCALE)
-img2 = cv2.imread("2.png", cv2.IMREAD_GRAYSCALE)
+img1 = cv2.imread("5.jpg", cv2.IMREAD_GRAYSCALE)
+img2 = cv2.imread("6.png", cv2.IMREAD_GRAYSCALE)
 
 # 获取sift特征检测器
 sift = cv2.xfeatures2d.SIFT_create()

@@ -38,10 +38,12 @@ def alignImages(im1,im2):
 
 if __name__ == '__main__':
     # 读取标准图像
-    refFilename="1.jpg"
+    
+    refFilename="../../images/testing/13.jpg"
     imReference=cv2.imread(refFilename)
+    
     # 读取待对齐的图像
-    imFilename="2.png"
+    imFilename="../../images/testing/14.png"
     im=cv2.imread(imFilename)
     print("正在对齐")
     imReg,h=alignImages(im,imReference)
