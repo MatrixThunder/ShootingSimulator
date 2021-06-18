@@ -11,11 +11,11 @@ import numpy as np
 MIN_MATCH_COUNT = 10
 
 # 读入两幅图片 图片中有相同部分
-img1 = cv2.imread("5.jpg", cv2.IMREAD_GRAYSCALE)
-img2 = cv2.imread("6.png", cv2.IMREAD_GRAYSCALE)
+img1 = cv2.imread("../../images/testing/13.jpg", cv2.IMREAD_GRAYSCALE)
+img2 = cv2.imread("../../images/testing/14.png", cv2.IMREAD_GRAYSCALE)
 
 # 获取sift特征检测器
-sift = cv2.xfeatures2d.SIFT_create()
+sift = cv2.SIFT_create()
 # 检测关键点 计算描述符
 kp1, des1 = sift.detectAndCompute(img1, None)
 kp2, des2 = sift.detectAndCompute(img2, None)
@@ -49,7 +49,7 @@ if len(good) > MIN_MATCH_COUNT:
     # 计算第二张图相对于第一张图的畸变
     pts = np.float32([[0, 0], [0, h-1], [w-1, 0]]).reshape(-1, 1, 2)
     dst = cv2.perspectiveTransform(pts, M)
-    img2 = cv2.polylines(img2, [np.int32(dst)], True, 255, 3, cv2.LINE_AA)
+    # img2 = cv2.polylines(img2, [np.int32(dst)], True, 255, 3, cv2.LINE_AA)
 else:
     matchesMask = None
 

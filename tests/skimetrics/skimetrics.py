@@ -27,5 +27,5 @@ for c in cnts:
 
 # 用cv2.imshow 展现最终对比之后的图片， cv2.imwrite 保存最终的结果图片
 cv2.imshow("Modified", imageB)
-cv2.imwrite(r"D:\Software\PythonProject\image\result.png", imageB)
+cv2.imwrite(r"imageB.png", imageB)
 cv2.waitKey(0)
