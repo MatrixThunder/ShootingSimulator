@@ -32,7 +32,7 @@ def alignImages(im1,im2):
     h,mask=cv2.findHomography(points1,points2,cv2.RANSAC)
     # 使用矩阵
     height,width,channels =im2.shape
-    im1Reg=cv2.warpPerspective(im1,h,(width, height))
+    im1Reg=cv2.warpPerspective(im1,h,(width, height)) #output the croped image
     return im1Reg, h
 
 
