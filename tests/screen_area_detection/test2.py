@@ -92,24 +92,40 @@ def get_region_corners(frame):
     contours = sorted(contours, key=cv2.contourArea, reverse=True)[:10]
     screen_contours = None
 
-    for c in contours:
+    
+    for idx,c in enumerate(contours):
         # Approximate the contour
         peri = cv2.arcLength(c, True)
         approx = cv2.approxPolyDP(c, 0.02 * peri, True)
 
         # If our contour has four points, we probably found the screen
         if len(approx) == 4:
+
+
+            print(idx)
             screen_contours = approx
-            break
-    else:
-        print('Did not find contour')
-    # Uncomment these lines to see the contours on the image
-    cv2.drawContours(frame, [screen_contours], -1, (0, 255, 0), 3)
-    cv2.imshow('Screen', frame)
-    cv2.waitKey(0)
-    pts = screen_contours.reshape(4, 2)
-    rect = order_corners(pts)
-    return rect
+            # break
+            cv2.drawContours(frame, [screen_contours], -1, (0, 255, 0), 3)
+            cv2.imshow('Screen', frame)
+            # cv2.waitKey(0)
+        else:
+            print('Did not find contour')
+    
+    
+    try:        
+        # Uncomment these lines to see the contours on the image
+        cv2.drawContours(frame, [screen_contours], -1, (0, 255, 0), 3)
+        cv2.imshow('Screen', frame)
+
+
+        # cv2.waitKey(0)
+        pts = screen_contours.reshape(4, 2)
+        rect = order_corners(pts)
+
+        return rect
+
+    except Exception :
+        print("except!")
 
 
 def order_corners(pts):
@@ -166,53 +182,64 @@ def get_perspective_transform(stream, screen_resolution):
     :param screen_resolution: Resolution of projector or screen
     :param prop_file: camera property file
     """
-    reference_image = get_reference_image(screen_resolution)
+    try:
+        reference_image = get_reference_image(screen_resolution)
 
-    # Display the reference image
-    show_full_frame(reference_image)
-    # Delay execution a quarter of a second to make sure the image is displayed 
-    # Don't use time.sleep() here, we want the IO loop to run.  Sleep doesn't do that
-    cv2.waitKey(250) 
+        # Display the reference image
+        # show_full_frame(reference_image)
+        # Delay execution a quarter of a second to make sure the image is displayed 
+        # Don't use time.sleep() here, we want the IO loop to run.  Sleep doesn't do that
+        cv2.waitKey(250) 
 
-    # Grab a photo of the frame
-    frame = stream.read()
-    # We're going to work with a smaller image, so we need to save the scale
-    ratio = frame.shape[0] / 300.0
+        # Grab a photo of the frame
+        frame = stream.read()
+        # We're going to work with a smaller image, so we need to save the scale
+        ratio = frame.shape[0] / 300.0
 
-    # # Undistort the camera image
-    # frame = undistort_image(frame)
+        # # Undistort the camera image
+        # frame = undistort_image(frame)
 
-    orig = frame.copy()
-    # Resize our image smaller, this will make things a lot faster
-    frame = imutils.resize(frame, height=300)
+        orig = frame.copy()
+        # Resize our image smaller, this will make things a lot faster
+        frame = imutils.resize(frame, height=300)
 
-    rect = get_region_corners(frame)
-    rect *= ratio  # We shrank the image, so now we have to scale our points up
 
-    dst, max_width, max_height = get_destination_array(rect)
+        rect = get_region_corners(frame)
+        rect *= ratio  # We shrank the image, so now we have to scale our points up
 
-    # Remove the reference image from the display
-    hide_full_frame()
+        dst, max_width, max_height = get_destination_array(rect)
 
-    m = cv2.getPerspectiveTransform(rect, dst)
+        # Remove the reference image from the display
+        hide_full_frame()
 
-    # Uncomment the lines below to see the transformed image
-    # wrap = cv2.warpPerspective(orig, m, (max_width, max_height))
+        m = cv2.getPerspectiveTransform(rect, dst)
 
-    # cv2.imshow('all better', wrap)
-    # cv2.waitKey(0)
-    return m, max_width, max_height
+        # Uncomment the lines below to see the transformed image
+        # wrap = cv2.warpPerspective(orig, m, (max_width, max_height))
+
+        # cv2.imshow('all better', wrap)
+        # cv2.waitKey(0)
+        return m, max_width, max_height
+    except Exception:
+        print("except!")
 
 if __name__ == '__main__':
+    
     # args = parse_args()
     # Camera frame resolution
     # resolution = (args.get('camera_width'), args.get('camera_height'))
 
-    stream = VideoStream(usePiCamera=False, resolution=(320,240)).start()
-
+    stream = VideoStream(usePiCamera=False, resolution=(1024,768)).start()
+    
     time.sleep(2)  # Let the camera warm up
 
-    screen_res = (1024, 768)
-    get_perspective_transform(stream, screen_res)
+    screen_res = (320, 240)
+
+    while(True):
+        get_perspective_transform(stream, screen_res)
+        # stream.stop()
+        # cv2.waitKey(0)
+
     stream.stop()
+    cv2.waitKey(0)
     cv2.destroyAllWindows()
