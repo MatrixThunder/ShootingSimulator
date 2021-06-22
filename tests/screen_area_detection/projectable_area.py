@@ -1,13 +1,26 @@
-import argparse
-import json
-import time
 import cv2
+import time
+import json
 import imutils
+import cv2
 import numpy as np
+
+
+
+from cv2 import aruco
 from imutils.video import VideoStream
-from charuco import charucoBoard
-from charuco import charucoDictionary
-from charuco import detectorParams
+
+
+def show_full_frame(frame):
+    """
+    Given a frame, display the image in full screen
+    :param frame: image to display full screen
+    """
+    cv2.namedWindow('Full Screen', cv2.WND_PROP_FULLSCREEN)
+    cv2.setWindowProperty('Full Screen', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+    cv2.imshow('Full Screen', frame)
+
+
 
 def hide_full_frame(window='Full Screen'):
     """
@@ -26,20 +39,6 @@ def get_reference_image(img_resolution=(1680, 1050)):
     img = np.ones((height, width, 1), np.uint8) * 255
     return img
 
-def load_camera_props(props_file=None):
-    """
-    Load the camera properties from file.  To build this file you need
-    to run the aruco_calibration.py file
-    :param props_file: Camera property file name
-    """
-    if props_file is None:
-        props_file = 'camera_config.json'
-    with open(props_file, 'r') as f:
-        data = json.load(f)
-    camera_matrix = np.array(data.get('camera_matrix'))
-    dist_coeffs = np.array(data.get('dist_coeffs'))
-    return camera_matrix, dist_coeffs
-
 def undistort_image(image, camera_matrix=None, dist_coeffs=None, prop_file=None):
     """
     Given an image from the camera module, load the camera properties and correct
@@ -48,8 +47,8 @@ def undistort_image(image, camera_matrix=None, dist_coeffs=None, prop_file=None)
     resolution = image.shape
     if len(resolution) == 3:
         resolution = resolution[:2]
-    if camera_matrix is None and dist_coeffs is None:
-        camera_matrix, dist_coeffs = load_camera_props(prop_file)
+    # if camera_matrix is None and dist_coeffs is None:
+    #     camera_matrix, dist_coeffs = load_camera_props(prop_file)
     resolution = resolution[::-1]  # Shape gives us (height, width) so reverse it
     new_camera_matrix, valid_pix_roi = cv2.getOptimalNewCameraMatrix(
         camera_matrix,
@@ -88,29 +87,46 @@ def get_region_corners(frame):
     """
     edged = find_edges(frame)
     # findContours is destructive, so send in a copy
-    image, contours, hierarchy = cv2.findContours(edged.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours,hierachy = cv2.findContours(edged.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     # Sort our contours by area, and keep the 10 largest
     contours = sorted(contours, key=cv2.contourArea, reverse=True)[:10]
     screen_contours = None
 
-    for c in contours:
+    
+    for idx,c in enumerate(contours):
         # Approximate the contour
         peri = cv2.arcLength(c, True)
         approx = cv2.approxPolyDP(c, 0.02 * peri, True)
 
         # If our contour has four points, we probably found the screen
         if len(approx) == 4:
+
+
+            print(idx)
             screen_contours = approx
-            break
-    else:
-        print('Did not find contour')
-    # Uncomment these lines to see the contours on the image
-    # cv2.drawContours(frame, [screen_contours], -1, (0, 255, 0), 3)
-    # cv2.imshow('Screen', frame)
-    # cv2.waitKey(0)
-    pts = screen_contours.reshape(4, 2)
-    rect = order_corners(pts)
-    return rect
+            # break
+            cv2.drawContours(frame, [screen_contours], -1, (0, 255, 0), 3)
+            cv2.imshow('Screen', frame)
+            # cv2.waitKey(0)
+        else:
+            print('Did not find contour')
+    
+    
+    try:        
+        # Uncomment these lines to see the contours on the image
+        cv2.drawContours(frame, [screen_contours], -1, (0, 255, 0), 3)
+        cv2.imshow('Screen', frame)
+
+
+        # cv2.waitKey(0)
+        pts = screen_contours.reshape(4, 2)
+        rect = order_corners(pts)
+
+        return rect
+
+    except Exception :
+        print("except!")
+
 
 def order_corners(pts):
     """
@@ -128,8 +144,6 @@ def order_corners(pts):
     diff = np.diff(pts, axis=1)
     rect[1] = pts[np.argmin(diff)]
     rect[3] = pts[np.argmax(diff)]
-    return rectn_contours.reshape(4, 2)
-    rect = order_corners(pts)
     return rect
 
 def get_destination_array(rect):
@@ -159,24 +173,7 @@ def get_destination_array(rect):
         ], dtype='float32')
     return dst, max_width, max_height
 
-def show_full_frame(frame):
-    """
-    Given a frame, display the image in full screen
-    :param frame: image to display full screen
-    """
-    cv2.namedWindow('Full Screen', cv2.WND_PROP_FULLSCREEN)
-    cv2.setWindowProperty('Full Screen', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-    cv2.imshow('Full Screen', frame)
-
-
-def hide_full_frame(window='Full Screen'):
-    """
-    Kill a named window, the default is the window named 'Full Screen'
-    :param window: Window name if different than default
-    """
-    cv2.destroyWindow(window)
-
-def get_perspective_transform(stream, screen_resolution, prop_file):
+def get_perspective_transform(stream, screen_resolution):
     """
     Determine the perspective transform for the current physical layout
     return the perspective transform, max_width, and max_height for the
@@ -185,130 +182,64 @@ def get_perspective_transform(stream, screen_resolution, prop_file):
     :param screen_resolution: Resolution of projector or screen
     :param prop_file: camera property file
     """
-    reference_image = get_reference_image(screen_resolution)
+    try:
+        reference_image = get_reference_image(screen_resolution)
 
-    # Display the reference image
-    show_full_frame(reference_image)
-    # Delay execution a quarter of a second to make sure the image is displayed
-    # Don't use time.sleep() here, we want the IO loop to run.  Sleep doesn't do that
-    cv2.waitKey(250)
+        # Display the reference image
+        # show_full_frame(reference_image)
+        # Delay execution a quarter of a second to make sure the image is displayed 
+        # Don't use time.sleep() here, we want the IO loop to run.  Sleep doesn't do that
+        cv2.waitKey(250) 
 
-    # Grab a photo of the frame
-    frame = stream.read()
-    # We're going to work with a smaller image, so we need to save the scale
-    ratio = frame.shape[0] / 300.0
-
-    # Undistort the camera image
-    frame = undistort_image(frame, prop_file=prop_file)
-    orig = frame.copy()
-    # Resize our image smaller, this will make things a lot faster
-    frame = imutils.resize(frame, height=300)
-
-    rect = get_region_corners(frame)
-    rect *= ratio  # We shrank the image, so now we have to scale our points up
-
-    dst, max_width, max_height = get_destination_array(rect)
-
-    # Remove the reference image from the display
-    hide_full_frame()
-
-    m = cv2.getPerspectiveTransform(rect, dst)
-
-    # Uncomment the lines below to see the transformed image
-    # wrap = cv2.warpPerspective(orig, m, (max_width, max_height))
-
-    # cv2.imshow('all better', wrap)
-    # cv2.waitKey(0)
-    return m, max_width, max_height
-
-def parse_args():
-    """
-    A command line argument parser
-    :return:
-    """
-    ap = argparse.ArgumentParser()
-    # Camera frame resolution
-    ap.add_argument('-cw', '--camera_width', type=int, default=960,
-                    help='Camera image width')
-    ap.add_argument('-ch', '--camera_height', type=int, default=720,
-                    help='Camera image height')
-    # camera property file
-    ap.add_argument('-f', '--camera_props', default='camera_config.json',
-                    help='Camera property file')
-    # Screen resolution
-    ap.add_argument('-sw', '--screen_width', type=int, default=1680,
-                    help='Projector or screen width')
-    ap.add_argument('-sh', '--screen_height', type=int, default=1050,
-                    help='Projector or screen height')
-    return vars(ap.parse_args())
-
-def save_json(data):
-    """
-    Save our data object as json to the camera_config file
-    :param data: data to  write to file
-    """
-    filename = 'camera_config.json'
-    print('Saving to file: ' + filename)
-    json_data = json.dumps(data)
-    with open(filename, 'w') as f:
-        f.write(json_data)
-
-def show_calibration_frame(frame):
-    """
-    Given a calibration frame, display the image in full screen
-    Use case is a projector.  The camera module can find the projection region
-    using the test pattern
-    """
-    cv2.namedWindow("Calibration", cv2.WND_PROP_FULLSCREEN)
-    cv2.setWindowProperty("Calibration", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-    cv2.imshow("Calibration", frame)
-
-def hide_calibration_frame(window="Calibration"):
-    """
-    Kill a named window, the default is the window named "Calibration"
-    """
-    cv2.destroyWindow(window)
-
-def calibrate_camera():
-    """
-    Calibrate our Camera
-    """
-    required_count = 50
-    resolution = (960, 720)
-    stream = VideoStream(usePiCamera=False, resolution=resolution).start()
-    time.sleep(2)  # Warm up the camera
-    
-    all_corners = []
-    all_ids = []
-
-    frame_idx = 0
-    frame_spacing = 5
-    success = False
-
-    while True:
+        # Grab a photo of the frame
         frame = stream.read()
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        # We're going to work with a smaller image, so we need to save the scale
+        ratio = frame.shape[0] / 300.0
 
-        marker_corners, marker_ids, _ = aruco.detectMarkers(
-        gray,
-        charucoDictionary,
-        parameters=detectorParams)
-        calibration_board = charucoBoard.draw((1680, 1050))
-        show_calibration_frame(calibration_board)
+        # # Undistort the camera image
+        # frame = undistort_image(frame)
+
+        orig = frame.copy()
+        # Resize our image smaller, this will make things a lot faster
+        frame = imutils.resize(frame, height=300)
+
+
+        rect = get_region_corners(frame)
+        rect *= ratio  # We shrank the image, so now we have to scale our points up
+
+        dst, max_width, max_height = get_destination_array(rect)
+
+        # Remove the reference image from the display
+        hide_full_frame()
+
+        m = cv2.getPerspectiveTransform(rect, dst)
+
+        # Uncomment the lines below to see the transformed image
+        # wrap = cv2.warpPerspective(orig, m, (max_width, max_height))
+
+        # cv2.imshow('all better', wrap)
+        # cv2.waitKey(0)
+        return m, max_width, max_height
+    except Exception:
+        print("except!")
 
 if __name__ == '__main__':
-    calibrate_camera()
+    
     # args = parse_args()
-    # # Camera frame resolution
+    # Camera frame resolution
     # resolution = (args.get('camera_width'), args.get('camera_height'))
 
-    # # stream = VideoStream(usePiCamera=True, resolution=resolution).start()
+    stream = VideoStream(usePiCamera=False, resolution=(1024,768)).start()
+    
+    time.sleep(2)  # Let the camera warm up
 
-    # stream = VideoStream(usePiCamera=False, resolution=resolution).start()
+    screen_res = (320, 240)
 
-    # time.sleep(2)  # Let the camera warm up
+    while(True):
+        get_perspective_transform(stream, screen_res)
+        # stream.stop()
+        # cv2.waitKey(0)
 
-    # screen_res = (args.get('screen_width'), args.get('screen_height'))
-    # get_perspective_transform(stream, screen_res, args.get('camera_props'))
-    # stream.stop()
-    # cv2.destroyAllWindows()
+    stream.stop()
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
