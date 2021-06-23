@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 
 
-from cv2 import aruco
+#from cv2 import aruco
 from imutils.video import VideoStream
 
 
@@ -78,8 +78,10 @@ def find_edges(frame):
     :return: Found edges in image
     """
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    gray = cv2.bilateralFilter(gray, 11, 17, 17)  # Add some blur
-    edged = cv2.Canny(gray, 30, 200)  # Find our edges
+    gray = cv2.bilateralFilter(gray, 5, 160, 160)  # Add some blur
+    #gray = cv2.GaussianBlur(gray, (3,3), sigmaX=7)
+    edged = cv2.Canny(gray, 230, 240)  # Find our edges
+    cv2.imshow("canny image", edged)
     return edged
 
 
@@ -128,13 +130,15 @@ def get_region_corners(frame, ref_shape):
 
         x1, x2, y1, y2 = min(x), max(x), min(y), max(y)
 
+        cv2.imshow('Screen', frame)
+
         cropped = frame[y1:y2, x1:x2]
 
-        cv2.imshow('Screen', frame)
         cv2.imshow('Cropped', cropped)
 
-        resized = cv2.resize(cropped, ref_shape, interpolation=cv2.INTER_AREA)
-        cv2.imshow('Resized', resized)
+        # resized = cv2.resize(cropped, ref_shape, interpolation=cv2.INTER_AREA)
+
+        # cv2.imshow('Cropped', resized)
 
         # cv2.waitKey(0)
         pts = screen_contours.reshape(4, 2)
@@ -257,25 +261,26 @@ if __name__ == '__main__':
     # Camera frame resolution
     # resolution = (args.get('camera_width'), args.get('camera_height'))
 
+    ref_img = cv2.imread("../../images/gray_background.png")
+    # print(ref_img)
+
+    width, height, _ = ref_img.shape
+
+    ref_size = (width, height)
+
     stream = VideoStream(usePiCamera=False, resolution=(320, 240)).start()
 
     time.sleep(2)  # Let the camera warm up
 
     screen_res = (320, 240)
 
-    ref_img = cv2.imread("../../images/gray_background.png")
-    # print(ref_img)
-
-    width, height, _ = ref_img.shape
-
-    ref_shape = (width, height)
-
     while(True):
-        get_perspective_transform(stream, screen_res, ref_shape)
+        get_perspective_transform(stream, screen_res, ref_size)
         # frame = stream.read()
         # cv2.imshow('Screen', frame)
         # stream.stop()
         # cv2.waitKey(1)
+        time.sleep(0.01)
 
     stream.stop()
     cv2.waitKey(0)
