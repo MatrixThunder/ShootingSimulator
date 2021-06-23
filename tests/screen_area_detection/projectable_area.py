@@ -18,6 +18,7 @@ def show_full_frame(frame):
     cv2.namedWindow('Full Screen', cv2.WND_PROP_FULLSCREEN)
     cv2.setWindowProperty(
         'Full Screen', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+
     cv2.imshow('Full Screen', frame)
 
 
@@ -117,12 +118,25 @@ def get_region_corners(frame):
     try:
         # Uncomment these lines to see the contours on the image
         cv2.drawContours(frame, [screen_contours], -1, (0, 255, 0), 3)
+
+        x, y = [], []
+
+        for contour_line in [screen_contours]:
+            for contour in contour_line:
+                x.append(contour[0][0])
+                y.append(contour[0][1])
+
+        x1, x2, y1, y2 = min(x), max(x), min(y), max(y)
+
+        cropped = frame[y1:y2, x1:x2]
+
         cv2.imshow('Screen', frame)
+        cv2.imshow('Cropped', cropped)
 
         # cv2.waitKey(0)
         pts = screen_contours.reshape(4, 2)
         rect = order_corners(pts)
-
+        print("rect %s" % rect)
         return rect
 
     except Exception:
@@ -151,9 +165,17 @@ def order_corners(pts):
 def get_destination_array(rect):
     """
     Given a rectangle return the destination array
-    :param rect: array of points  in [top left, top right, bottom right, bottom left] format
+    :param rect: array of points  in 
+    [
+    - tl top left, 
+    - tr top right,
+    - br bottom right,
+    - bl bottom left
+    ] 
+    format
     """
     (tl, tr, br, bl) = rect  # Unpack the values
+
     # Compute the new image width
     width_a = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
     width_b = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
@@ -192,7 +214,7 @@ def get_perspective_transform(stream, screen_resolution):
         # show_full_frame(reference_image)
         # Delay execution a quarter of a second to make sure the image is displayed
         # Don't use time.sleep() here, we want the IO loop to run.  Sleep doesn't do that
-        cv2.waitKey(250)
+        cv2.waitKey(1)
 
         # Grab a photo of the frame
         frame = stream.read()
@@ -239,11 +261,11 @@ if __name__ == '__main__':
     screen_res = (320, 240)
 
     while(True):
-        # get_perspective_transform(stream, screen_res)
-        frame = stream.read()
-        cv2.imshow('Screen', frame)
+        get_perspective_transform(stream, screen_res)
+        # frame = stream.read()
+        # cv2.imshow('Screen', frame)
         # stream.stop()
-        cv2.waitKey(1)
+        # cv2.waitKey(1)
 
     stream.stop()
     cv2.waitKey(0)
