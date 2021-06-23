@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 
 
-from cv2 import aruco
+#from cv2 import aruco
 from imutils.video import VideoStream
 
 
@@ -78,12 +78,14 @@ def find_edges(frame):
     :return: Found edges in image
     """
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    gray = cv2.bilateralFilter(gray, 11, 17, 17)  # Add some blur
-    edged = cv2.Canny(gray, 30, 200)  # Find our edges
+    gray = cv2.bilateralFilter(gray, 5, 160, 160)  # Add some blur
+    #gray = cv2.GaussianBlur(gray, (3,3), sigmaX=7)
+    edged = cv2.Canny(gray, 230, 240)  # Find our edges
+    cv2.imshow("canny image", edged)
     return edged
 
 
-def get_region_corners(frame):
+def get_region_corners(frame, ref_shape):
     """
     Find the four corners of our projected region and return them in
     the proper order
@@ -129,6 +131,8 @@ def get_region_corners(frame):
         x1, x2, y1, y2 = min(x), max(x), min(y), max(y)
 
         cropped = frame[y1:y2, x1:x2]
+
+        cropped = cv2.resize(cropped, ref_shape, interpolation=cv2.INTER_AREA)
 
         cv2.imshow('Screen', frame)
         cv2.imshow('Cropped', cropped)
@@ -198,7 +202,7 @@ def get_destination_array(rect):
     return dst, max_width, max_height
 
 
-def get_perspective_transform(stream, screen_resolution):
+def get_perspective_transform(stream, screen_resolution, ref_shape=None):
     """
     Determine the perspective transform for the current physical layout
     return the perspective transform, max_width, and max_height for the
@@ -228,7 +232,7 @@ def get_perspective_transform(stream, screen_resolution):
         # Resize our image smaller, this will make things a lot faster
         frame = imutils.resize(frame, height=300)
 
-        rect = get_region_corners(frame)
+        rect = get_region_corners(frame, ref_shape)
         rect *= ratio  # We shrank the image, so now we have to scale our points up
 
         dst, max_width, max_height = get_destination_array(rect)
@@ -254,6 +258,13 @@ if __name__ == '__main__':
     # Camera frame resolution
     # resolution = (args.get('camera_width'), args.get('camera_height'))
 
+    ref_img = cv2.imread("../../images/gray_background.png")
+    #print(ref_img)
+
+    width, height, _ = ref_img.shape
+
+    ref_size = (width, height)
+
     stream = VideoStream(usePiCamera=False, resolution=(320, 240)).start()
 
     time.sleep(2)  # Let the camera warm up
@@ -261,11 +272,12 @@ if __name__ == '__main__':
     screen_res = (320, 240)
 
     while(True):
-        get_perspective_transform(stream, screen_res)
+        get_perspective_transform(stream, screen_res, ref_size)
         # frame = stream.read()
         # cv2.imshow('Screen', frame)
         # stream.stop()
         # cv2.waitKey(1)
+        time.sleep(0.01)
 
     stream.stop()
     cv2.waitKey(0)
