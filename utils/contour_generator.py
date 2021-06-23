@@ -22,7 +22,7 @@ from utils import settings as config
 
 #     cvui.button(background,10,15,'Load Config')
 #     cvui.button(background,25,55,'Save Config')
-    
+
 #     cvui.imshow(WINDOW_NAME, background)
 
 
@@ -31,21 +31,16 @@ def empty(a):
 
 
 gray = 1
-blurred = 2 
+blurred = 2
 imgCanny = 3
 thresh = 4
 imgDialation = 5
 
-ths = 0 
-kernel_config = 0 
+ths = 0
+kernel_config = 0
+
 
 def contour_generator(frame):
-
-    ## CVUI stuff:
-    # init_windows()
-
-
-
 
     ratio = 3
 
@@ -57,6 +52,9 @@ def contour_generator(frame):
     cv2.namedWindow("TrackBars")
     cv2.resizeWindow("TrackBars", 640, 300)
 
+    # Tracker Bars are for adjusting the params to get a better
+    # and smoother contour of the target, which will help calculating
+    # hit areas and doing the scoring.
     cv2.createTrackbar("HUE min", "TrackBars", 0, 179, empty)
     cv2.createTrackbar("HUE max", "TrackBars", 19, 179, empty)
     cv2.createTrackbar("SAT min", "TrackBars", 0, 170, empty)
@@ -66,19 +64,15 @@ def contour_generator(frame):
     cv2.createTrackbar("THS", "TrackBars", 0, 85, empty)
     cv2.createTrackbar("KNL size", "TrackBars", 0, 10, empty)
 
-    cv2.createButton("buttonName", empty)
-
-
     ths = None
     kernel_config = None
     # print(config.read_img_settings())
     if(config.read_img_settings() is not None):
-        ths, kernel_config = itemgetter("threshold","kernel_config" )(config.read_img_settings()) 
-        if((ths is not None) and (kernel_config is not None)):    
+        ths, kernel_config = itemgetter(
+            "threshold", "kernel_config")(config.read_img_settings())
+        if((ths is not None) and (kernel_config is not None)):
             cv2.setTrackbarPos("THS", "TrackBars", ths)
             cv2.setTrackbarPos("KNL size", "TrackBars", kernel_config)
-
-
 
     while True:
 
@@ -96,24 +90,23 @@ def contour_generator(frame):
 
         kernel_config_val = cv2.getTrackbarPos("KNL size", "TrackBars")
 
-
-
         kernel_config = 2 * kernel_config_val + 1
 
-        lower = np.array([h_min,s_min,v_min])
-        upper = np.array([h_max,s_max,v_max])
+        lower = np.array([h_min, s_min, v_min])
+        upper = np.array([h_max, s_max, v_max])
 
         kernel_size = (kernel_config, kernel_config)
         kernel = np.ones(kernel_size, np.uint8)
 
-        mask = cv2.inRange(hsv,lower, upper)  
-        imgResult = cv2.bitwise_and(frame, frame, mask=mask) 
+        mask = cv2.inRange(hsv, lower, upper)
+        imgResult = cv2.bitwise_and(frame, frame, mask=mask)
         cv2.imshow("imgResult", imgResult)
 
         # 加载图像，转换为灰度，使用5 x 5内核进行高斯平滑处理，阈值化
         gray = cv2.cvtColor(hsv, cv2.COLOR_BGR2GRAY)
         #blurred = cv2.GaussianBlur(gray, kernel_size, 0)
-        blurred = cv2.bilateralFilter(gray, d=kernel_config, sigmaColor=112, sigmaSpace= kernel_config, borderType=cv2.BORDER_REPLICATE)
+        blurred = cv2.bilateralFilter(
+            gray, d=kernel_config, sigmaColor=112, sigmaSpace=kernel_config, borderType=cv2.BORDER_REPLICATE)
         imgCanny = cv2.Canny(blurred, ths, ths*ratio, 5, L2gradient=True)
         thresh = cv2.threshold(blurred, 70, 255, cv2.THRESH_BINARY)[1]
         imgDialation = cv2.dilate(imgCanny, kernel, iterations=1)
@@ -127,8 +120,6 @@ def contour_generator(frame):
         # cnts = cv2.findContours(thresh.copy(), cv2.RETR_LIST,
         #                         cv2.CHAIN_APPROX_NONE)
 
-
-
         cv2.imshow("generated thresh", thresh)
         cv2.imshow("generated dialation", imgDialation)
 
@@ -139,13 +130,13 @@ def contour_generator(frame):
         if key == ord('q'):
             cv2.destroyAllWindows
             break
-     
-    cnts = cv2.findContours(imgDialation, cv2.RETR_LIST,
-                                cv2.CHAIN_APPROX_SIMPLE)
 
-    cnts = imutils.grab_contours(cnts)       
+    cnts = cv2.findContours(imgDialation, cv2.RETR_LIST,
+                            cv2.CHAIN_APPROX_SIMPLE)
+
+    cnts = imutils.grab_contours(cnts)
 
     # Saving settings to the local folder
-    config.save_img_settings(ths,kernel_config_val)
+    config.save_img_settings(ths, kernel_config_val)
 
     return cnts, imgDialation

@@ -6,7 +6,6 @@ import cv2
 import numpy as np
 
 
-
 from cv2 import aruco
 from imutils.video import VideoStream
 
@@ -17,9 +16,9 @@ def show_full_frame(frame):
     :param frame: image to display full screen
     """
     cv2.namedWindow('Full Screen', cv2.WND_PROP_FULLSCREEN)
-    cv2.setWindowProperty('Full Screen', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+    cv2.setWindowProperty(
+        'Full Screen', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
     cv2.imshow('Full Screen', frame)
-
 
 
 def hide_full_frame(window='Full Screen'):
@@ -28,6 +27,7 @@ def hide_full_frame(window='Full Screen'):
     :param window: Window name if different than default
     """
     cv2.destroyWindow(window)
+
 
 def get_reference_image(img_resolution=(1680, 1050)):
     """
@@ -39,6 +39,7 @@ def get_reference_image(img_resolution=(1680, 1050)):
     img = np.ones((height, width, 1), np.uint8) * 255
     return img
 
+
 def undistort_image(image, camera_matrix=None, dist_coeffs=None, prop_file=None):
     """
     Given an image from the camera module, load the camera properties and correct
@@ -49,7 +50,8 @@ def undistort_image(image, camera_matrix=None, dist_coeffs=None, prop_file=None)
         resolution = resolution[:2]
     # if camera_matrix is None and dist_coeffs is None:
     #     camera_matrix, dist_coeffs = load_camera_props(prop_file)
-    resolution = resolution[::-1]  # Shape gives us (height, width) so reverse it
+    # Shape gives us (height, width) so reverse it
+    resolution = resolution[::-1]
     new_camera_matrix, valid_pix_roi = cv2.getOptimalNewCameraMatrix(
         camera_matrix,
         dist_coeffs,
@@ -67,6 +69,7 @@ def undistort_image(image, camera_matrix=None, dist_coeffs=None, prop_file=None)
     image = cv2.remap(image, mapx, mapy, cv2.INTER_LINEAR)
     return image
 
+
 def find_edges(frame):
     """
     Given a frame, find the edges
@@ -78,6 +81,7 @@ def find_edges(frame):
     edged = cv2.Canny(gray, 30, 200)  # Find our edges
     return edged
 
+
 def get_region_corners(frame):
     """
     Find the four corners of our projected region and return them in
@@ -87,13 +91,13 @@ def get_region_corners(frame):
     """
     edged = find_edges(frame)
     # findContours is destructive, so send in a copy
-    contours,hierachy = cv2.findContours(edged.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierachy = cv2.findContours(
+        edged.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     # Sort our contours by area, and keep the 10 largest
     contours = sorted(contours, key=cv2.contourArea, reverse=True)[:10]
     screen_contours = None
 
-    
-    for idx,c in enumerate(contours):
+    for idx, c in enumerate(contours):
         # Approximate the contour
         peri = cv2.arcLength(c, True)
         approx = cv2.approxPolyDP(c, 0.02 * peri, True)
@@ -101,22 +105,19 @@ def get_region_corners(frame):
         # If our contour has four points, we probably found the screen
         if len(approx) == 4:
 
-
             print(idx)
             screen_contours = approx
             # break
-            cv2.drawContours(frame, [screen_contours], -1, (0, 255, 0), 3)
-            cv2.imshow('Screen', frame)
-            # cv2.waitKey(0)
+            # cv2.drawContours(frame, [screen_contours], -1, (0, 255, 0), 3)
+            # cv2.imshow('Screen', frame)
+
         else:
             print('Did not find contour')
-    
-    
-    try:        
+
+    try:
         # Uncomment these lines to see the contours on the image
         cv2.drawContours(frame, [screen_contours], -1, (0, 255, 0), 3)
         cv2.imshow('Screen', frame)
-
 
         # cv2.waitKey(0)
         pts = screen_contours.reshape(4, 2)
@@ -124,7 +125,7 @@ def get_region_corners(frame):
 
         return rect
 
-    except Exception :
+    except Exception:
         print("except!")
 
 
@@ -145,6 +146,7 @@ def order_corners(pts):
     rect[1] = pts[np.argmin(diff)]
     rect[3] = pts[np.argmax(diff)]
     return rect
+
 
 def get_destination_array(rect):
     """
@@ -170,8 +172,9 @@ def get_destination_array(rect):
         [max_width - 1, 0],  # Top right point
         [max_width - 1, max_height - 1],  # Bottom right point
         [0, max_height - 1],  # Bottom left point
-        ], dtype='float32')
+    ], dtype='float32')
     return dst, max_width, max_height
+
 
 def get_perspective_transform(stream, screen_resolution):
     """
@@ -187,9 +190,9 @@ def get_perspective_transform(stream, screen_resolution):
 
         # Display the reference image
         # show_full_frame(reference_image)
-        # Delay execution a quarter of a second to make sure the image is displayed 
+        # Delay execution a quarter of a second to make sure the image is displayed
         # Don't use time.sleep() here, we want the IO loop to run.  Sleep doesn't do that
-        cv2.waitKey(250) 
+        cv2.waitKey(250)
 
         # Grab a photo of the frame
         frame = stream.read()
@@ -203,14 +206,13 @@ def get_perspective_transform(stream, screen_resolution):
         # Resize our image smaller, this will make things a lot faster
         frame = imutils.resize(frame, height=300)
 
-
         rect = get_region_corners(frame)
         rect *= ratio  # We shrank the image, so now we have to scale our points up
 
         dst, max_width, max_height = get_destination_array(rect)
 
         # Remove the reference image from the display
-        hide_full_frame()
+        # hide_full_frame()
 
         m = cv2.getPerspectiveTransform(rect, dst)
 
@@ -223,22 +225,25 @@ def get_perspective_transform(stream, screen_resolution):
     except Exception:
         print("except!")
 
+
 if __name__ == '__main__':
-    
+
     # args = parse_args()
     # Camera frame resolution
     # resolution = (args.get('camera_width'), args.get('camera_height'))
 
-    stream = VideoStream(usePiCamera=False, resolution=(1024,768)).start()
-    
+    stream = VideoStream(usePiCamera=False, resolution=(320, 240)).start()
+
     time.sleep(2)  # Let the camera warm up
 
     screen_res = (320, 240)
 
     while(True):
-        get_perspective_transform(stream, screen_res)
+        # get_perspective_transform(stream, screen_res)
+        frame = stream.read()
+        cv2.imshow('Screen', frame)
         # stream.stop()
-        # cv2.waitKey(0)
+        cv2.waitKey(1)
 
     stream.stop()
     cv2.waitKey(0)

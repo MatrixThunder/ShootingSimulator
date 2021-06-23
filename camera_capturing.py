@@ -7,11 +7,6 @@ import time
 import sys
 import logging as log
 
-# https://www.pianshen.com/article/25231761732/
-cascPath = "C:/Users/Rickson Judao Zhong/AppData/Local/Programs/Python/Python39/Lib/site-packages/cv2/data/haarcascade_frontalface_default.xml"
-pathEyes = 'C:/Users/Rickson Judao Zhong/AppData/Local/Programs/Python/Python39/Lib/site-packages/cv2/data/haarcascade_eye.xml'
-faceCascade = cv2.CascadeClassifier(cascPath)
-eyesCascade = cv2.CascadeClassifier(pathEyes)
 
 # 1. Create an object
 video = cv2.VideoCapture(0)
@@ -41,27 +36,20 @@ while True:
 
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    detector = cv2.SimpleBlobDetector()
+    # 二值化
+    ret, thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
 
-    # # Detect blobs.
-    # keypoints = detector.detect(im)
+    # 寻找轮廓
+    contours, hierarchy = cv2.findContours(
+        thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-    # # Draw detected blobs as red circles.
-    # # cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS ensures the size of the circle corresponds to the size of blob
-    # im_with_keypoints = cv2.drawKeypoints(im, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-
-    keypoints = detector.detect(gray)
-
-    for (x, y, w, h) in keypoints:
-        print("blob detected!")
-        cv2.rectangle(gray, (int(x), int(y)),
-                      (int(x+w), int(y+h)), (255, 255, 0), 2)
+    # 画出轮廓，-1,表示所有轮廓，画笔颜色为(0, 255, 0)，即Green，粗细为3
+    cv2.drawContours(gray, contours, -1, (255, 255, 0), 3)
 
     cv2.imshow("capturing", gray)
 
-
-# 4 show the frame!
-# cv2.imshow("capturing", frame)
+    # 4 show the frame!
+    # cv2.imshow("capturing", frame)
 
     # 5 For press any key to out (ms)
     key = cv2.waitKey(1)
