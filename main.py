@@ -1,21 +1,18 @@
-from __future__ import print_function
-import cv2 as cv
-import numpy as np
+from utils import capture_camera as cc
+from utils import detect_contour_centers as dcc
+from utils import detect_hit as dh
+from utils import contour_generator as cg
+from utils import detect_contour_centers as d
+
+import cv2
 
 
-def laser_coor(image):
-    detector = cv.SimpleBlobDetector()  # initiate laser detector
-    laser_dot = detector.detect(image)
-    x = laser_dot.pt[0]  # x coordinate of the detected laser dot
-    y = laser_dot.pt[1]  # y coordinate of the detected laser dot
-    s = laser_dot.size  # the diameter of the meaningful laser dot neighborhood
-    return x, y, s
+
+if __name__ == '__main__':
 
 
-def error(lasercor, target):
-    ex = np.abs(lasercor[0] - target[0])  # error between target and laser in x-axis
-    ey = np.abs(lasercor[1] - target[1])  # error between target and laser in y-axis
-    err = np.linalg.norm([ex,ey])  # calculate the Euclidean Distance error
-    return err
-
-
+    target_img = cv2.imread("./images/man_target_none.png")
+    generated_cnts, generated_dialation = cg.contour_generator(target_img)
+    # cc.capture_camera("utils/recording3.mp4",dcc.detect_contour_centers,dh.detect_hit, generated_cnts)
+    # cc.capture_camera("./videos/man_target_2.mp4",dcc.detect_contour_centers,dh.detect_hit, generated_cnts, generated_dialation)
+    cc.capture_camera(0,dcc.detect_contour_centers,dh.detect_hit, generated_cnts, generated_dialation)
