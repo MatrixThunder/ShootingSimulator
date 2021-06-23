@@ -4,15 +4,15 @@ import numpy as np
 # img = cv2.imread("../images/gray_background.png")
 # img = cv2.imread("../images/test.png")
 # img = cv2.imread("../images/laser_dot2.png")
-img = cv2.imread("../images/target.png")
-
+# img = cv2.imread("../images/target.png")
+img = cv2.imread("../images/captured_man_target_hit_center.png")
 
 # 转到HSV
 hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 print(hsv)
 
 # 设置阈值
-l_blue = np.array([[0, 0, 240]])
+l_blue = np.array([[0, 0, 250]])
 h_blue = np.array([180, 30, 255])
 
 # 构建掩模
