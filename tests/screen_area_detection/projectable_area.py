@@ -10,6 +10,9 @@ from cv2 import aruco
 from imutils.video import VideoStream
 
 
+# class Video_Streamer():
+#     def __init__(self, )
+
 def show_full_frame(frame):
     """
     Given a frame, display the image in full screen
@@ -83,7 +86,7 @@ def find_edges(frame):
     return edged
 
 
-def get_region_corners(frame, ref_shape):
+def get_region_corners(frame, ref_shape, vid_out):
     """
     Find the four corners of our projected region and return them in
     the proper order
@@ -134,6 +137,7 @@ def get_region_corners(frame, ref_shape):
         cv2.imshow('Cropped', cropped)
 
         resized = cv2.resize(cropped, ref_shape, interpolation=cv2.INTER_AREA)
+        vid_out.write(resized)
         cv2.imshow('Resized', resized)
 
         # cv2.waitKey(0)
@@ -168,13 +172,13 @@ def order_corners(pts):
 def get_destination_array(rect):
     """
     Given a rectangle return the destination array
-    :param rect: array of points  in 
+    :param rect: array of points  in
     [
-    - tl top left, 
+    - tl top left,
     - tr top right,
     - br bottom right,
     - bl bottom left
-    ] 
+    ]
     format
     """
     (tl, tr, br, bl) = rect  # Unpack the values
@@ -201,7 +205,7 @@ def get_destination_array(rect):
     return dst, max_width, max_height
 
 
-def get_perspective_transform(stream, screen_resolution, ref_shape=None):
+def get_perspective_transform(stream, screen_resolution, ref_shape, vid_out):
     """
     Determine the perspective transform for the current physical layout
     return the perspective transform, max_width, and max_height for the
@@ -231,7 +235,7 @@ def get_perspective_transform(stream, screen_resolution, ref_shape=None):
         # Resize our image smaller, this will make things a lot faster
         frame = imutils.resize(frame, height=300)
 
-        rect = get_region_corners(frame, ref_shape)
+        rect = get_region_corners(frame, ref_shape, vid_out)
         rect *= ratio  # We shrank the image, so now we have to scale our points up
 
         dst, max_width, max_height = get_destination_array(rect)
@@ -263,19 +267,29 @@ if __name__ == '__main__':
 
     screen_res = (320, 240)
 
-    ref_img = cv2.imread("../../images/gray_background.png")
-    # print(ref_img)
+    ref_img = cv2.imread(
+        "../../images/testing/background_blue_ridge_white.jpg")
 
     width, height, _ = ref_img.shape
+    # print(ref_img)
+
+    # frame_height, frame_width, num_channels = ref_img.shape
+
+    vid_out = cv2.VideoWriter('outpy.avi', cv2.VideoWriter_fourcc(
+        'M', 'J', 'P', 'G'), 10, (width, height))
 
     ref_shape = (width, height)
 
     while(True):
-        get_perspective_transform(stream, screen_res, ref_shape)
-        # frame = stream.read()
+
+        get_perspective_transform(stream, screen_res, ref_shape, vid_out)
+
         # cv2.imshow('Screen', frame)
         # stream.stop()
-        # cv2.waitKey(1)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    vid_out.release()
 
     stream.stop()
     cv2.waitKey(0)

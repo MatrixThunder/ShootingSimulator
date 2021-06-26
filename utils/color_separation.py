@@ -1,13 +1,14 @@
 import cv2
 import numpy as np
 
-img = cv2.imread("../images/gray_background.png")
+# img = cv2.imread("../images/gray_background.png")
 # img = cv2.imread("../images/test.png")
 # img = cv2.imread("../images/laser_dot2.png")
 # img = cv2.imread("../images/target.png")
 # img = cv2.imread("../images/captured_man_target_hit_center.png")
 # img = cv2.imread("../images/uncanny_target.png")
-
+# img = cv2.imread("../images/testing/hit_detection.png")
+img = cv2.imread("../images/erika.png")
 
 # 转到HSV
 hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
