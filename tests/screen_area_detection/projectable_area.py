@@ -119,8 +119,6 @@ def get_region_corners(frame, ref_shape, vid_out):
             print('Did not find contour')
 
     try:
-        # Uncomment these lines to see the contours on the image
-        cv2.drawContours(frame, [screen_contours], -1, (0, 255, 0), 3)
 
         x, y = [], []
 
@@ -133,12 +131,15 @@ def get_region_corners(frame, ref_shape, vid_out):
 
         cropped = frame[y1:y2, x1:x2]
 
-        cv2.imshow('Screen', frame)
         cv2.imshow('Cropped', cropped)
 
         resized = cv2.resize(cropped, ref_shape, interpolation=cv2.INTER_AREA)
         vid_out.write(resized)
         cv2.imshow('Resized', resized)
+
+        # Uncomment these lines to see the contours on the image
+        cv2.drawContours(frame, [screen_contours], -1, (0, 255, 0), 3)
+        cv2.imshow('Screen', frame)
 
         # cv2.waitKey(0)
         pts = screen_contours.reshape(4, 2)

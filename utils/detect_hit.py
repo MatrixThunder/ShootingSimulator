@@ -21,7 +21,7 @@ def detect_hit(frame, cnts, passed_in_dialation):
     # Create the mask
 
     # change 250 to lower numbers to include more values as "white"
-    mask = cv2.inRange(Lchannel, 220, 255)
+    mask = cv2.inRange(Lchannel, 254, 255)
     # Apply Mask to original image
 
     res = cv2.bitwise_and(frame, frame, mask=mask)
@@ -36,9 +36,11 @@ def detect_hit(frame, cnts, passed_in_dialation):
     # laser beam cnt
     blurred = cv2.GaussianBlur(mask, kernel_size, 0)
     imgCanny = cv2.Canny(blurred, 100, 100*ratio, 6)
+
     thresh = cv2.threshold(blurred, 70, 255, cv2.THRESH_BINARY)[1]
     imgDialation = cv2.dilate(imgCanny, kernel, iterations=2)
 
+    # RETR_EXTERNAL
     laser_cnts = cv2.findContours(
         imgDialation, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cv2.imshow('imgDialation', imgDialation)
@@ -100,7 +102,10 @@ def detect_hit(frame, cnts, passed_in_dialation):
 
     cv2.imshow("hit_in_dialation", passed_in_dialation_copy)
 
+    cv2.namedWindow("hit_colored", cv2.WINDOW_NORMAL)
+    # cv2.moveWindow("hit_colored", 0, 200)
+
     cv2.imshow("hit_colored", frame)
 
-    cv2.moveWindow("hit_in_dialation", 400, 500)
-    cv2.moveWindow("hit_colored", 800, 500)
+    # cv2.moveWindow("hit_in_dialation", 400, 500)
+    # cv2.moveWindow("hit_colored", 800, 500)
