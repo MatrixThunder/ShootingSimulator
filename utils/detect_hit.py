@@ -43,7 +43,7 @@ def detect_hit(frame, cnts, passed_in_dialation):
     # RETR_EXTERNAL
     laser_cnts = cv2.findContours(
         imgDialation, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    cv2.imshow('imgDialation', imgDialation)
+    cv2.imshow("Bullet Point Dialation", imgDialation)
 
     laser_cnts = imutils.grab_contours(laser_cnts)
 

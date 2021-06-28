@@ -59,8 +59,7 @@ while True:
         cv2.putText(gray, "center", (cX - 20, cY - 20),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
         # 展示图像
-        cv2.imshow("imgDialation", gray)
-
+        cv2.imshow("Bullet Point Dialation", gray)
 
 
 # 4 show the frame!
