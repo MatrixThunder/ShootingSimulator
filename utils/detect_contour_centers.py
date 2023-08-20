@@ -5,6 +5,17 @@ import imutils
 import cv2
 import numpy as np
 
+'''
+A function that receives a frame and does contour detection
+
+Args: 
+    frame: A matrix passed in for detections
+
+Returns : 
+    cnts :  
+
+'''
+
 
 def detect_contour_centers(frame):
     # 构建命令行参数

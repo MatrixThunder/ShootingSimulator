@@ -10,9 +10,6 @@ from imutils.video import VideoStream
 from cv2 import aruco
 
 
-# class Video_Streamer():
-#     def __init__(self, )
-
 def show_full_frame(frame):
     """
     Given a frame, display the image in full screen
